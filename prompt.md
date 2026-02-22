@@ -841,7 +841,7 @@ Props: { active: string, onChange: (v: string) => void }
 ### 10.9 Predictions page (src/app/predictions/page.tsx)
 ```
 - Heading: "AI Predictions" text-2xl font-bold
-- Subtitle: "Powered by Gemini 1.5 Flash · Updated before each tip-off"
+- Subtitle: "Powered by Ollama · Updated before each tip-off"
 - Disclaimer badge: "🤖 AI-generated analysis · Not financial advice" bg-orange-dim text-orange text-xs px-3 py-1 rounded-full
 - On mount: fetch all games, then for each fetch /api/predictions/{game_id} via Promise.all
 - While loading: show 3 LoadingSkeleton cards

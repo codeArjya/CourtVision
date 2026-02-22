@@ -1,14 +1,56 @@
-from google import genai
-from google.genai import types
+# backend/app/services/gemini_service.py
+# Fully migrated from google.generativeai to Groq.
+# AsyncGroq is natively async — no run_in_executor needed anywhere.
+# pip install groq
+
 import json
+import logging
+
+from groq import AsyncGroq, APIConnectionError, APIStatusError, RateLimitError
+
 from app.config import settings
 
-# ─── CLIENT SETUP ────────────────────────────────────────────────────
-client = genai.Client(api_key=settings.GEMINI_API_KEY)
+logger = logging.getLogger(__name__)
 
-MODEL = "gemini-2.5-flash"
+# ─── CLIENT ──────────────────────────────────────────────────────────────────
+client = AsyncGroq(api_key=settings.GROQ_API_KEY)
 
-# ─── GAME PREDICTION ───────────────────────────────────────────────
+# llama-3.3-70b-versatile: 14,400 req/day free, fast, strong instruction following
+MODEL = "llama-3.3-70b-versatile"
+
+
+# ─── SHARED ASYNC CALLER (non-streaming JSON responses) ──────────────────────
+
+async def _call_groq(system: str, user: str) -> dict:
+    try:
+        response = await client.chat.completions.create(
+            model=MODEL,
+            messages=[
+                {"role": "system", "content": system},
+                {"role": "user", "content": user},
+            ],
+            temperature=0.7,
+            max_completion_tokens=1024,
+            response_format={"type": "json_object"},  # guarantees valid JSON back
+        )
+        text = response.choices[0].message.content or ""
+        return json.loads(text)
+    except json.JSONDecodeError as e:
+        logger.error(f"[Groq] JSON parse failed: {e} | raw: {text[:200]}")
+        raise
+    except RateLimitError as e:
+        logger.error(f"[Groq] Rate limited: {e}")
+        raise
+    except APIConnectionError as e:
+        logger.error(f"[Groq] Connection error: {e}")
+        raise
+    except APIStatusError as e:
+        logger.error(f"[Groq] API error {e.status_code}: {e.message}")
+        raise
+
+
+# ─── GAME PREDICTION ─────────────────────────────────────────────────────────
+
 PREDICTION_SYSTEM = """You are a sharp NBA analyst. Return ONLY valid JSON with these exact keys:
 - winner: string (full team name)
 - winner_abbr: string (3-letter abbreviation)
@@ -18,83 +60,89 @@ PREDICTION_SYSTEM = """You are a sharp NBA analyst. Return ONLY valid JSON with 
 - key_factors: array of exactly 3 strings, each under 15 words, specific and stat-based
 No explanation. No markdown. Raw JSON object only."""
 
-async def generate_prediction(game: dict) -> dict:
-    user = f"""Game: {game['home_team_name']} (home) vs {game['away_team_name']} (away).
-Home record: {game.get('home_record', 'N/A')}. Away record: {game.get('away_record', 'N/A')}.
-Home last 5: {game.get('home_last5', 'W W L W L')}. Away last 5: {game.get('away_last5', 'L W W L W')}.
-Home rest days: {game.get('home_rest', 2)}. Away rest days: {game.get('away_rest', 1)}."""
-    return await _call_gemini(PREDICTION_SYSTEM, user)
 
-# ─── PLAYER CARD ────────────────────────────────────────────────────
+async def generate_prediction(game: dict) -> dict:
+    user = (
+        f"Game: {game['home_team_name']} (home) vs {game['away_team_name']} (away).\n"
+        f"Home record: {game.get('home_record', 'N/A')}. Away record: {game.get('away_record', 'N/A')}.\n"
+        f"Home last 5: {game.get('home_last5', 'W W L W L')}. Away last 5: {game.get('away_last5', 'L W W L W')}.\n"
+        f"Home rest days: {game.get('home_rest', 2)}. Away rest days: {game.get('away_rest', 1)}."
+    )
+    return await _call_groq(PREDICTION_SYSTEM, user)
+
+
+# ─── PLAYER CARD ─────────────────────────────────────────────────────────────
+
 PLAYER_CARD_SYSTEM = """You are an NBA scout. Return ONLY valid JSON with these exact keys:
 - report: string, exactly 3 sentences, specific and data-driven
 - projection: object with keys pts, reb, ast (each a string range like "22-26", "8-11", "4-7")
 - trend: string, must be exactly "hot", "cold", or "neutral"
 No explanation. No markdown. Raw JSON object only."""
 
-async def generate_player_card(data: dict) -> dict:
-    user = f"""Player: {data['player_name']}.
-Season averages: {data['season_avg'].get('pts', 'N/A')} PPG, {data['season_avg'].get('reb', 'N/A')} RPG, {data['season_avg'].get('ast', 'N/A')} APG.
-Last 5 games (points): {', '.join(str(x) for x in data['last5'])}.
-Tonight vs: {data['opponent']}."""
-    return await _call_gemini(PLAYER_CARD_SYSTEM, user)
 
-# ─── TAKE VERDICT ────────────────────────────────────────────────────
+async def generate_player_card(data: dict) -> dict:
+    user = (
+        f"Player: {data['player_name']}.\n"
+        f"Season averages: {data['season_avg'].get('pts', 'N/A')} PPG, "
+        f"{data['season_avg'].get('reb', 'N/A')} RPG, {data['season_avg'].get('ast', 'N/A')} APG.\n"
+        f"Last 5 games (points): {', '.join(str(x) for x in data['last5'])}.\n"
+        f"Tonight vs: {data['opponent']}."
+    )
+    return await _call_groq(PLAYER_CARD_SYSTEM, user)
+
+
+# ─── TAKE VERDICT ────────────────────────────────────────────────────────────
+
 TAKE_VERDICT_SYSTEM = """You are a data-driven NBA analyst. Return ONLY valid JSON with these exact keys:
 - steelman: string, exactly one sentence under 20 words, supports the take with a specific stat
 - challenge: string, exactly one sentence under 20 words, pushes back with a specific counter-stat
 - verdict_label: string, must be exactly "Backed by data", "Partially supported", or "Overblown"
 No explanation. No markdown. Raw JSON object only."""
 
+
 async def generate_take_verdict(take_text: str) -> dict:
     user = f'Media take: "{take_text}"'
-    return await _call_gemini(TAKE_VERDICT_SYSTEM, user)
+    return await _call_groq(TAKE_VERDICT_SYSTEM, user)
 
-# ─── SHARED CALLER ───────────────────────────────────────────────────
-async def _call_gemini(system: str, user: str) -> dict:
-    try:
-        response = await client.aio.models.generate_content(
-            model=MODEL,
-            contents=user,
-            config=types.GenerateContentConfig(
-                system_instruction=system,
-                temperature=0.7,
-                response_mime_type="application/json",
-            ),
-        )
-        text = response.text.strip()
-        clean = text.replace("```json", "").replace("```", "").strip()
-        return json.loads(clean)
-    except Exception as e:
-        print(f"[Gemini error] {e}")
-        raise
 
-# ─── CHAT STREAMING ──────────────────────────────────────────────────
-CHAT_SYSTEM_INSTRUCTION = """You are CourtIQ, an expert AI basketball assistant. You provide concise, insightful, and data-driven answers about NBA news, player stats, and general basketball knowledge. Keep responses under 3 paragraphs. Be friendly, energetic, and talk like a sharp basketball analyst."""
+# ─── CHAT STREAMING ──────────────────────────────────────────────────────────
+
+CHAT_SYSTEM_INSTRUCTION = (
+    "You are CourtIQ, an expert AI basketball assistant. "
+    "You provide concise, insightful, and data-driven answers about NBA news, player stats, "
+    "and general basketball knowledge. Keep responses under 3 paragraphs. "
+    "Be friendly, energetic, and talk like a sharp basketball analyst."
+)
+
 
 async def generate_chat_stream(messages: list):
-    # Build history for all messages except the last
-    formatted_history = []
-    for msg in messages[:-1]:
-        role = "model" if msg.role == "assistant" else "user"
-        formatted_history.append(
-            types.Content(role=role, parts=[types.Part(text=msg.content)])
-        )
-
-    current_message = messages[-1].content
+    """
+    Native async streaming via AsyncGroq — no threading or queues needed.
+    Yields text chunks as they arrive from the model.
+    """
+    formatted = [{"role": "system", "content": CHAT_SYSTEM_INSTRUCTION}]
+    for msg in messages:
+        role = "assistant" if msg.role == "assistant" else "user"
+        formatted.append({"role": role, "content": msg.content})
 
     try:
-        chat = client.aio.chats.create(
+        stream = await client.chat.completions.create(
             model=MODEL,
-            history=formatted_history,
-            config=types.GenerateContentConfig(
-                system_instruction=CHAT_SYSTEM_INSTRUCTION,
-                temperature=0.7,
-            ),
+            messages=formatted,
+            temperature=0.7,
+            max_completion_tokens=1024,
+            stream=True,
         )
-        async for chunk in await chat.send_message_stream(current_message):
-            if chunk.text:
-                yield chunk.text
+        async for chunk in stream:
+            text = chunk.choices[0].delta.content or ""
+            if text:
+                yield text
+    except RateLimitError as e:
+        logger.error(f"[Groq chat] Rate limited: {e}")
+        yield "Sorry, I'm getting too many requests right now. Try again in a moment."
+    except APIConnectionError as e:
+        logger.error(f"[Groq chat] Connection error: {e}")
+        yield "Sorry, I couldn't reach the AI service. Check your connection."
     except Exception as e:
-        print(f"[Gemini chat error] {e}")
-        yield f"Sorry, something went wrong: {e}"
+        logger.error(f"[Groq chat] Unexpected error: {e}")
+        yield "Sorry, something went wrong. Please try again."

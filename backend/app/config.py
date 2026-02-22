@@ -3,8 +3,8 @@ from pydantic_settings import BaseSettings
 from functools import lru_cache
 
 class Settings(BaseSettings):
-    # Gemini
-    GEMINI_API_KEY: str
+    # Groq
+    GROQ_API_KEY: str
 
     # Supabase
     SUPABASE_URL: str
@@ -14,6 +14,9 @@ class Settings(BaseSettings):
     # Redis
     UPSTASH_REDIS_REST_URL: str = ""
     UPSTASH_REDIS_REST_TOKEN: str = ""
+
+    # BallDontLie
+    BALLDONTLIE_API_KEY: str
 
     # ML
     MODEL_PATH: str = "app/ml/artifacts/courtiq_model.pkl"

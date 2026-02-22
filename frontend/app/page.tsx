@@ -66,8 +66,7 @@ export default function DashboardPage() {
       ? currentGame?.home_team_abbr
       : currentGame?.away_team_abbr;
 
-  const displayedPlayers =
-    activeTeam === "home" ? homePlayers : awayPlayers;
+  const displayedPlayers = activeTeam === "home" ? homePlayers : awayPlayers;
 
   const topPlayers = [...displayedPlayers]
     .sort((a, b) => b.pts - a.pts)
@@ -156,7 +155,9 @@ export default function DashboardPage() {
               onClick={() => setShowFullBoxScore((v) => !v)}
               className="w-full py-2.5 border border-border rounded-xl text-secondary text-sm hover:border-orange/40 hover:text-orange transition-all mb-4 flex items-center justify-center gap-2"
             >
-              <span>{showFullBoxScore ? "▲ Hide" : "▼ View"} Full Box Score</span>
+              <span>
+                {showFullBoxScore ? "▲ Hide" : "▼ View"} Full Box Score
+              </span>
             </button>
 
             {showFullBoxScore && displayedPlayers.length > 0 && (
