@@ -103,6 +103,11 @@ def predict_game(game_dict: dict, games_df: pd.DataFrame) -> dict:
     else:
         key_factors.append("Expect a slower, defensive battle")
         
+    # Temporarily add this to predict_game in predict.py, right after extract_features
+    print(f"[DEBUG] home_id={game_dict.get('home_team_id')}, away_id={game_dict.get('away_team_id')}")
+    print(f"[DEBUG] games_df rows={len(games_df)}, sample team IDs={games_df['home_team_id'].unique()[:3].tolist() if not games_df.empty else 'EMPTY'}")
+    print(f"[DEBUG] features: home_pts={feats_dict['home_pts_L5']}, away_pts={feats_dict['away_pts_L5']}, home_win_pct={feats_dict['home_win_pct_L10']}")
+        
     return {
         "winner": winner_name,
         "winner_abbr": winner_abbr,
