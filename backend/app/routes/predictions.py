@@ -1,6 +1,6 @@
 from loguru import logger
 from fastapi import APIRouter
-from app.services import supabase_service, nba_service, gemini_service
+from app.services import supabase_service, gemini_service
 from app.ml.predict import predict_game
 
 router = APIRouter()

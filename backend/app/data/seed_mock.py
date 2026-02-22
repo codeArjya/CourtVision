@@ -163,14 +163,14 @@ def seed():
     print("🌱 Seeding player cards (LeBron pre-generated)...")
     try:
         client.table("player_cards").upsert({**SEED_PLAYER_CARD, "created_at": now}).execute()
-        print(f"  ✓ p001/game_001")
+        print("  ✓ p001/game_001")
     except Exception as e:
         print(f"  ✗ player_card: {e}")
 
     print("🌱 Seeding take verdicts (Stephen A. pre-generated)...")
     try:
         client.table("take_verdicts").upsert({**SEED_TAKE_VERDICT, "created_at": now}).execute()
-        print(f"  ✓ t001")
+        print("  ✓ t001")
     except Exception as e:
         print(f"  ✗ take_verdict: {e}")
 

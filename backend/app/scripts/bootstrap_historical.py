@@ -1,68 +1,85 @@
-import time
+# backend/app/scripts/bootstrap_historical.py
 from loguru import logger
-from datetime import datetime, timedelta
+import pandas as pd
 from app.services.supabase_service import supabase_client
-from app.config import settings
 
-def bootstrap_historical(seasons_back: int = 3):
+def bootstrap():
+    logger.info("Bootstrapping historical data...")
     if not supabase_client:
-        logger.error("Supabase client not initialized")
+        logger.error("No Supabase client")
         return
-        
-    logger.info(f"Looking back {seasons_back} seasons for historical data bootstrap")
+
     from nba_api.stats.endpoints import leaguegamefinder
     
-    # NBA API has standard season formats like 2023-24
-    # Simple date math to grab older seasons
-    current_year = datetime.now().year
+    # 3 seasons roughly back from 2025
+    seasons = ['2023-24', '2024-25']
     
-    total_inserted = 0
-    for s in range(seasons_back):
-        start = current_year - s - 1
-        end = str(current_year - s)[-2:]
-        season_str = f"{start}-{end}"
-        
-        logger.info(f"Fetching season {season_str} from NBA API...")
+    all_games = []
+    
+    for season in seasons:
+        logger.info(f"Fetching {season}...")
         try:
-            # 00 represents NBA regular season prefix for Game_ID
-            gamefinder = leaguegamefinder.LeagueGameFinder(season_nullable=season_str, league_id_nullable='00')
-            games = gamefinder.get_data_frames()[0]
-            
-            # Format to DB payload (Games)
-            if not games.empty:
-                logger.info(f"Found {len(games)} team-games in season {season_str}")
-                formatted = []
-                for _, row in games.iterrows():
-                    matchup = row['MATCHUP']
-                    if ' vs. ' in matchup:
-                        # Home game
-                        home_id = row['TEAM_ID']
-                        away_abbr = matchup.split(' vs. ')[1]
-                        home_score = row['PTS']
-                        # Away score must be derived by matching pairing or ignoring for raw mock
-                        formatted.append({
-                            "game_id": str(row['GAME_ID']),
-                            "date": row['GAME_DATE'],
-                            "home_id": str(home_id),
-                            "away_abbr": away_abbr, # Needs join mapping or second pass logic in complete impl
-                            "status": "final",
-                            "home_score": home_score,
-                            # Approximate away score based on +/-  if available
-                            "away_score": home_score - row.get('PLUS_MINUS', 0)
-                        })
-                
-                # Batch upsert mapped chunks
-                chunk_size = 500
-                for i in range(0, len(formatted), chunk_size):
-                    chunk = formatted[i:i + chunk_size]
-                    supabase_client.table("games").upsert(chunk).execute()
-                    total_inserted += len(chunk)
-                    
-            time.sleep(settings.NBA_API_DELAY)
+            gamefinder = leaguegamefinder.LeagueGameFinder(season_nullable=season, league_id_nullable='00')
+            df = gamefinder.get_data_frames()[0]
+            # Regular season only
+            df = df[df['SEASON_ID'].str.startswith('2')]
+            all_games.append(df)
         except Exception as e:
-            logger.error(f"Failed pulling historical season {season_str}: {e}")
+            logger.error(f"Failed to fetch {season}: {e}")
             
-    logger.info(f"Successfully bootstrapped {total_inserted} games.")
+    if not all_games:
+        return
+        
+    full_df = pd.concat(all_games)
+    
+    # We need to pivot to game-level for the games table
+    # This involves matching the home and away rows for the same GAME_ID
+    
+    logger.info(f"Loaded {len(full_df)} team-game logs. Shaping into game rows...")
+    
+    # Simple pairing hack since df has 2 rows per game
+    games_dict = {}
+    
+    # Matchup usually looks like 'LAL vs. BOS' or 'LAL @ BOS'
+    # 'vs.' means home, '@' means away
+    
+    for _, row in full_df.iterrows():
+        gid = str(row['GAME_ID'])
+        if gid not in games_dict:
+            games_dict[gid] = {
+                "game_id": gid,
+                "game_date": row['GAME_DATE'],
+                "status": "final"
+            }
+            
+        matchup = row['MATCHUP']
+        is_home = 'vs.' in matchup
+        
+        if is_home:
+            games_dict[gid]['home_team_id'] = str(row['TEAM_ID'])
+            games_dict[gid]['home_team_name'] = row['TEAM_NAME']
+            games_dict[gid]['home_team_abbr'] = row['TEAM_ABBREVIATION']
+            games_dict[gid]['home_score'] = int(row['PTS'])
+        else:
+            games_dict[gid]['away_team_id'] = str(row['TEAM_ID'])
+            games_dict[gid]['away_team_name'] = row['TEAM_NAME']
+            games_dict[gid]['away_team_abbr'] = row['TEAM_ABBREVIATION']
+            games_dict[gid]['away_score'] = int(row['PTS'])
+
+    # Filter out ones that didn't merge properly
+    valid_games = [g for g in games_dict.values() if 'home_score' in g and 'away_score' in g]
+    
+    logger.info(f"Inserting {len(valid_games)} finalized games into Supabase games table...")
+    
+    batch_size = 500
+    for i in range(0, len(valid_games), batch_size):
+        batch = valid_games[i:i+batch_size]
+        try:
+            supabase_client.table("games").upsert(batch).execute()
+        except Exception as e:
+            logger.error(f"Failed to upsert batch: {e}")
+            
+    logger.info("Historical bootstrap complete.")
 
 if __name__ == "__main__":
-    bootstrap_historical()
+    bootstrap()

@@ -1,60 +1,43 @@
-import time
-import requests
+# backend/app/scripts/bootstrap_players.py
+import pandas as pd
 from loguru import logger
 from app.services.supabase_service import supabase_client
+from nba_api.stats.endpoints import commonallplayers
 
 def bootstrap():
+    logger.info("Bootstrapping players data...")
     if not supabase_client:
-        logger.error("Supabase client not initialized")
+        logger.error("No Supabase client")
         return
-        
-    logger.info("Bootstrapping players from balldontlie via REST API")
-    url = "https://www.balldontlie.io/api/v1/players?per_page=100"
-    
-    # balldontlie API structure: metadata contains total_pages
+
     try:
-        page = 1
-        total_players = 0
-        while True:
-            logger.info(f"Fetching page {page}")
-            resp = requests.get(f"{url}&page={page}")
-            
-            if resp.status_code != 200:
-                logger.error(f"Failed pulling from {url}. Status: {resp.status_code}")
-                break
-                
-            data = resp.json()
-            players = data.get("data", [])
-            meta = data.get("meta", {})
-            
-            if not players:
-                break
-                
-            formatted = []
-            for p in players:
-                formatted.append({
-                    "player_id": str(p["id"]),
-                    "name": f"{p['first_name']} {p['last_name']}".strip(),
-                    "position": p.get("position", ""),
-                    "team_id": str(p["team"]["id"]) if "team" in p else None
-                })
-                
-            # Upsert
-            try:
-                supabase_client.table("players").upsert(formatted).execute()
-                total_players += len(formatted)
-            except Exception as e:
-                logger.error(f"Failed upserting block: {e}")
-                
-            if page >= meta.get("total_pages", page):
-                break
-                
-            page += 1
-            time.sleep(1) # simple rate limit respect
-            
-        logger.info(f"Successfully bootstrapped {total_players} players")
-    except Exception as e:
-        logger.exception("Bootstrap script failed unexpectedly")
+        # 1 means active roster
+        players_api = commonallplayers.CommonAllPlayers(is_only_current_season=1)
+        df = players_api.get_data_frames()[0]
         
+        logger.info(f"Found {len(df)} active players.")
+        
+        players_to_insert = []
+        for _, row in df.iterrows():
+            players_to_insert.append({
+                "player_id": str(row['PERSON_ID']),
+                "name": row['DISPLAY_FIRST_LAST'],
+                "team_id": str(row['TEAM_ID']) if pd.notnull(row['TEAM_ID']) else None,
+                "status": "active"
+            })
+            
+        logger.info("Inserting into Supabase players table...")
+        
+        # Batch insert
+        batch_size = 500
+        for i in range(0, len(players_to_insert), batch_size):
+            batch = players_to_insert[i:i+batch_size]
+            supabase_client.table("players").upsert(batch).execute()
+            
+        logger.info("Player bootstrap complete.")
+        
+    except Exception as e:
+        logger.error(f"Failed to bootstrap players: {e}")
+
 if __name__ == "__main__":
     bootstrap()

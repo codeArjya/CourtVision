@@ -1,22 +1,22 @@
-from fastapi import APIRouter
-from app.services import supabase_service
-from app.ml.predict import get_model_status
-from app.jobs.scheduler import trigger_ingest_job, trigger_retrain_job
-from pydantic import BaseModel
+# backend/app/routes/admin.py
+from fastapi import APIRouter, BackgroundTasks
+from app.ml.evaluate import get_model_status
+from app.jobs.ingest_games import run_ingest_games
+from app.jobs.retrain import run_retrain
 
-router = APIRouter(prefix="/admin", tags=["Admin"])
+router = APIRouter()
 
-@router.post("/trigger-ingest")
-async def trigger_ingest():
-    trigger_ingest_job()
+@router.post("/admin/trigger-ingest")
+async def trigger_ingest(background_tasks: BackgroundTasks):
+    background_tasks.add_task(run_ingest_games)
     return {"status": "ingest job queued"}
 
-@router.post("/trigger-retrain")
-async def trigger_retrain():
-    trigger_retrain_job()
+@router.post("/admin/trigger-retrain")
+async def trigger_retrain(background_tasks: BackgroundTasks):
+    background_tasks.add_task(run_retrain)
     return {"status": "retrain job queued"}
 
-@router.get("/model-status")
+@router.get("/admin/model-status")
 async def model_status():
     status = get_model_status()
     return status

@@ -1,4 +1,4 @@
-import os
+# backend/app/services/supabase_service.py
 from supabase import create_client, Client
 from app.config import settings
 
@@ -12,12 +12,9 @@ if supabase_url and supabase_key:
     except Exception as e:
         print(f"Failed to initialize Supabase client: {e}")
 
-# Redis mock configuration if URL and TOKEN aren't configured
-# Local dictionary to act as fake Redis for caching
 _local_redis_cache = {}
 
 async def redis_get(key: str) -> str | None:
-    # If no real Redis provided, use local dictionary
     if not settings.UPSTASH_REDIS_REST_URL:
         return _local_redis_cache.get(key)
         
@@ -61,27 +58,17 @@ def get_cached_prediction(game_id: str) -> dict | None:
             .table("predictions")
             .select("*")
             .eq("game_id", game_id)
-            .gte("generated_at", cutoff)
+            .gte("created_at", cutoff)
             .execute()
         )
         return res.data[0] if res.data else None
     except Exception:
         return None
 
-def set_cached_prediction(game_id: str, data: dict):
+def set_cached_prediction(data: dict):
     if not supabase_client: return
     try:
-        from datetime import datetime, timezone
-        row = {
-            "game_id": game_id,
-            "winner": data.get("winner"),
-            "confidence": data.get("confidence"),
-            "score_home": data.get("score_home"),
-            "score_away": data.get("score_away"),
-            "key_factors": data.get("key_factors", []),
-            "generated_at": datetime.now(timezone.utc).isoformat()
-        }
-        supabase_client.table("predictions").upsert(row).execute()
+        supabase_client.table("predictions").upsert(data).execute()
     except Exception:
         pass
 
@@ -97,11 +84,9 @@ def get_cached_player_card(player_id: str, game_id: str) -> dict | None:
             .select("*")
             .eq("player_id", player_id)
             .eq("game_id", game_id)
-            .gte("generated_at", cutoff)
+            .gte("created_at", cutoff)
             .execute()
         )
-        
-        # Format mapping back to standard Gemini DTO
         if res.data:
             c = res.data[0]
             return {
@@ -113,20 +98,10 @@ def get_cached_player_card(player_id: str, game_id: str) -> dict | None:
     except Exception:
         return None
 
-def set_cached_player_card(player_id: str, game_id: str, data: dict):
+def set_cached_player_card(data: dict):
     if not supabase_client: return
     try:
-        from datetime import datetime, timezone
-        row = {
-            "player_id": player_id,
-            "game_id": game_id,
-            "report": data.get("report"),
-            "projection": data.get("projection"),
-            "trend": data.get("trend"),
-            "generated_at": datetime.now(timezone.utc).isoformat()
-        }
-        # Player_cards PK is card_id out-of-box, but upsert with match helps if constraints set
-        supabase_client.table("player_cards").insert(row).execute()
+        supabase_client.table("player_cards").upsert(data).execute()
     except Exception:
         pass
 
@@ -143,20 +118,16 @@ def vote_take(take_id: str, vote: str) -> dict | None:
     if not supabase_client: return None
     try:
         col = "agrees" if vote == "agree" else "disagrees"
-        # Supabase API does not have an atomic "increment" function natively available
-        # via the standard python client without an RPC call.
-        # We must fetch the current row, increment, and write.
         res = supabase_client.table("media_takes").select(col).eq("id", take_id).execute()
         if not res.data: return None
         
         current_val = res.data[0][col]
-        
         upd = supabase_client.table("media_takes").update({col: current_val + 1}).eq("id", take_id).execute()
         
         if upd.data:
-            # Return updated counts (requiring full select again for both cols ideally but cheating by merging)
-            res2 = supabase_client.table("media_takes").select("agrees, disagrees").eq("id", take_id).execute()
-            return res2.data[0]
+            res2 = supabase_client.table("media_takes").select("id as take_id, agrees, disagrees").eq("id", take_id).execute()
+            if res2.data:
+                return res2.data[0]
         return None
     except Exception:
         return None
@@ -169,17 +140,9 @@ def get_take_verdict(take_id: str) -> dict | None:
     except Exception:
         return None
 
-def set_take_verdict(take_id: str, data: dict):
+def set_take_verdict(data: dict):
     if not supabase_client: return
     try:
-        from datetime import datetime, timezone
-        row = {
-            "take_id": take_id,
-            "steelman": data.get("steelman"),
-            "challenge": data.get("challenge"),
-            "verdict_label": data.get("verdict_label"),
-            "generated_at": datetime.now(timezone.utc).isoformat()
-        }
-        supabase_client.table("take_verdicts").upsert(row).execute()
+        supabase_client.table("take_verdicts").upsert(data).execute()
     except Exception:
         pass

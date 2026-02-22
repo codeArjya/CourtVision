@@ -1,7 +1,7 @@
 from loguru import logger
 from fastapi import APIRouter
 from pydantic import BaseModel
-from typing import List, Optional
+from typing import List
 from app.services import supabase_service, gemini_service
 
 router = APIRouter()
