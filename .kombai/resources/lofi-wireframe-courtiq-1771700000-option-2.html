@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>CourtIQ — Wireframe Option 2: Sports Stats Hub</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: #fff; font-family: 'Comic Sans MS', 'Chalkboard SE', cursive; color: #333; font-size: 14px; }
+  .page-title { background: #eee; border-bottom: 2px solid #333; padding: 12px 20px; }
+  .page-title h1 { font-size: 20px; }
+  .page-title p { font-size: 12px; color: #666; margin-top: 4px; }
+  .reuse-badge { position: absolute; top: -8px; right: -8px; background: #4CAF50; color: #fff; padding: 2px 6px; border-radius: 3px; font-size: 10px; font-weight: bold; z-index: 10; font-family: Arial, sans-serif; white-space: nowrap; }
+  .new-badge { position: absolute; top: -8px; right: -8px; background: #FF9800; color: #fff; padding: 2px 6px; border-radius: 3px; font-size: 10px; font-weight: bold; z-index: 10; font-family: Arial, sans-serif; white-space: nowrap; }
+  .box { border: 2px solid #999; background: #e8e8e8; display: flex; align-items: center; justify-content: center; color: #777; font-size: 11px; text-align: center; border-radius: 4px; }
+  .section-label { font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: #888; margin-bottom: 8px; border-bottom: 1px solid #ddd; padding-bottom: 4px; }
+  .row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+  .annotation { background: #e3f2fd; border: 1px solid #90caf9; padding: 6px 10px; border-radius: 4px; font-size: 11px; color: #1565c0; margin: 6px 0; font-family: Arial, sans-serif; }
+  .divider { border: none; border-top: 2px dashed #ccc; margin: 16px 0; }
+  .page-section { max-width: 900px; margin: 0 auto; padding: 20px; }
+  /* TOP TICKER */
+  .live-ticker { background: #e8e8e8; border-bottom: 2px solid #333; padding: 6px 16px; display: flex; gap: 20px; overflow: hidden; font-size: 12px; }
+  .ticker-item { display: flex; gap: 8px; align-items: center; white-space: nowrap; }
+  /* NAVBAR */
+  .navbar { display: flex; align-items: center; border-bottom: 2px solid #333; padding: 10px 20px; gap: 20px; background: #f5f5f5; }
+  /* SIDEBAR LAYOUT */
+  .layout { display: flex; gap: 0; min-height: 400px; }
+  .sidebar { width: 200px; min-width: 200px; border-right: 2px solid #ccc; padding: 12px; background: #f9f9f9; }
+  .main { flex: 1; padding: 16px; }
+  /* HERO GAME */
+  .hero-game { border: 2px solid #333; border-radius: 8px; padding: 16px; background: #fff; margin-bottom: 14px; }
+  .hero-score { font-size: 48px; font-weight: bold; font-family: 'Courier New', monospace; text-align: center; padding: 10px 20px; }
+  .team-block { text-align: center; }
+  .team-logo-lg { width: 64px; height: 64px; border: 2px solid #888; border-radius: 50%; background: #ddd; display: flex; align-items: center; justify-content: center; font-size: 12px; margin: 0 auto 6px; }
+  .team-name-lg { font-size: 14px; font-weight: bold; }
+  .team-city { font-size: 11px; color: #888; }
+  /* SIDEBAR GAME LIST ITEMS */
+  .sidebar-game { padding: 8px; border: 1px solid #ccc; border-radius: 6px; margin-bottom: 8px; cursor: pointer; background: #fff; }
+  .sidebar-game.active { border: 2px solid #333; background: #f0f0f0; }
+  .sidebar-game .abbr-row { display: flex; gap: 6px; align-items: center; font-size: 12px; font-weight: bold; }
+  .sidebar-game .abbr-row .mini-logo { width: 18px; height: 18px; border: 1px solid #999; border-radius: 50%; background: #e0e0e0; font-size: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .sidebar-game .score-sm { font-family: 'Courier New', monospace; font-weight: bold; font-size: 14px; }
+  /* STAT CARD */
+  .stat-card { border: 1px solid #ccc; border-radius: 6px; padding: 8px 12px; background: #fff; text-align: center; }
+  .stat-card .val { font-size: 22px; font-weight: bold; font-family: 'Courier New', monospace; }
+  .stat-card .lbl { font-size: 10px; color: #888; text-transform: uppercase; }
+  /* PLAYER CARD */
+  .player-card-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 10px; }
+  .player-item { border: 1px solid #ccc; border-radius: 6px; padding: 8px; background: #fff; }
+  /* PREDICTION TWO COL */
+  .pred-vs { display: flex; align-items: center; gap: 0; margin: 10px 0; }
+  .pred-team { flex: 1; padding: 10px; border: 2px solid #ccc; border-radius: 6px; text-align: center; }
+  .pred-vs-divider { padding: 0 12px; font-size: 14px; color: #888; }
+  /* TAKES MASONRY STYLE */
+  .takes-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .take-card { border: 2px solid #aaa; border-radius: 8px; padding: 12px; }
+  .avatar-sm { width: 32px; height: 32px; border: 2px solid #888; border-radius: 50%; background: #ddd; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: bold; flex-shrink: 0; }
+</style>
+</head>
+<body>
+
+<div class="page-title">
+  <h1>Option 2: Sports Stats Hub</h1>
+  <p>Left sidebar for game navigation, hero featured game in main area, two-column Takes layout. Rich detail density for power users.</p>
+</div>
+
+<div class="page-section">
+
+  <!-- ======================== GAMES PAGE ======================== -->
+  <div class="section-label">Page: / — Today's Games</div>
+
+  <!-- LIVE SCORE TICKER -->
+  <div style="position: relative; margin-bottom: 0;">
+    <span class="new-badge" style="top: -6px; right: 4px;">[NEW] ScoreTicker</span>
+    <div class="live-ticker">
+      <strong style="margin-right: 6px;">⚡ LIVE:</strong>
+      <div class="ticker-item">
+        <div class="box" style="width: 18px; height: 18px; border-radius: 50%; font-size: 9px;">L</div>
+        BOS 82
+        <strong>vs</strong>
+        LAL 87
+        <span style="font-size: 10px; color: #666;">Q3 4:22</span>
+      </div>
+      <span style="color: #ccc;">|</span>
+      <div class="ticker-item" style="color: #999;">DEN vs GSW · 7:30 PM ET</div>
+      <span style="color: #ccc;">|</span>
+      <div class="ticker-item" style="color: #999;">MIL 103 – MIA 109 · FINAL</div>
+    </div>
+  </div>
+
+  <!-- NAVBAR -->
+  <div style="position: relative; margin-bottom: 0;">
+    <span class="reuse-badge" style="top: -6px;">[REUSE] Navbar</span>
+    <div class="navbar">
+      <div style="font-size: 16px; font-weight: bold;">🏀 CourtIQ</div>
+      <div style="margin-left: auto; display: flex; gap: 20px; font-size: 13px;">
+        <span style="border-bottom: 2px solid #333; font-weight: bold;">Games</span>
+        <span style="color: #888;">Predictions</span>
+        <span style="color: #888;">Takes</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="annotation">🆕 KEY CHANGE: Left sidebar lists all games. Main area shows full detail of selected game including stats, charts, and player highlights.</div>
+
+  <!-- SIDEBAR + MAIN LAYOUT -->
+  <div class="layout" style="border: 2px solid #ccc; border-radius: 0 0 8px 8px;">
+    <!-- SIDEBAR -->
+    <div style="position: relative;">
+      <span class="new-badge" style="top: 4px; right: 4px; position: relative; display: block; margin-bottom: 8px;">[NEW] GameSidebar</span>
+      <div class="sidebar">
+        <div style="font-size: 11px; font-weight: bold; text-transform: uppercase; color: #666; margin-bottom: 10px;">Today · Feb 21</div>
+
+        <!-- Filter tabs -->
+        <div style="display: flex; gap: 4px; margin-bottom: 10px;">
+          <div style="border: 1px solid #ccc; border-radius: 12px; padding: 2px 8px; font-size: 10px; background: #333; color: #fff;">All</div>
+          <div style="border: 1px solid #ccc; border-radius: 12px; padding: 2px 8px; font-size: 10px;">Live</div>
+          <div style="border: 1px solid #ccc; border-radius: 12px; padding: 2px 8px; font-size: 10px;">Final</div>
+        </div>
+
+        <!-- Game items -->
+        <div class="sidebar-game active">
+          <div style="font-size: 9px; color: #c00; font-weight: bold; margin-bottom: 4px;">● LIVE Q3 4:22</div>
+          <div class="abbr-row">
+            <div class="mini-logo">B</div> BOS
+            <div class="score-sm" style="margin-left: auto;">82</div>
+          </div>
+          <div class="abbr-row" style="margin-top: 2px;">
+            <div class="mini-logo">L</div> LAL
+            <div class="score-sm" style="margin-left: auto; text-decoration: underline;">87</div>
+          </div>
+        </div>
+
+        <div class="sidebar-game">
+          <div style="font-size: 9px; color: #888; margin-bottom: 4px;">⏰ 7:30 PM ET</div>
+          <div class="abbr-row">
+            <div class="mini-logo">D</div> DEN
+            <div style="margin-left: auto; font-size: 12px; color: #bbb;">–</div>
+          </div>
+          <div class="abbr-row" style="margin-top: 2px;">
+            <div class="mini-logo">G</div> GSW
+          </div>
+        </div>
+
+        <div class="sidebar-game" style="opacity: 0.7;">
+          <div style="font-size: 9px; color: #666; margin-bottom: 4px;">FINAL</div>
+          <div class="abbr-row">
+            <div class="mini-logo">M</div> MIL
+            <div class="score-sm" style="margin-left: auto;">103</div>
+          </div>
+          <div class="abbr-row" style="margin-top: 2px;">
+            <div class="mini-logo">M</div> MIA
+            <div class="score-sm" style="margin-left: auto; text-decoration: underline;">109</div>
+          </div>
+        </div>
+
+        <!-- Overlay Filters -->
+        <div style="margin-top: 16px; padding-top: 10px; border-top: 1px solid #ddd;">
+          <div style="font-size: 10px; font-weight: bold; color: #777; margin-bottom: 6px; text-transform: uppercase;">Stat Overlay</div>
+          <div style="display: flex; flex-direction: column; gap: 4px;">
+            <div style="border: 1px solid #333; border-radius: 4px; padding: 4px 8px; font-size: 11px; background: #333; color: #fff;">No Overlay</div>
+            <div style="border: 1px solid #ccc; border-radius: 4px; padding: 4px 8px; font-size: 11px;">📊 League Rank</div>
+            <div style="border: 1px solid #ccc; border-radius: 4px; padding: 4px 8px; font-size: 11px;">📈 Form</div>
+            <div style="border: 1px solid #ccc; border-radius: 4px; padding: 4px 8px; font-size: 11px;">⚔️ Matchup</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MAIN AREA -->
+    <div class="main">
+      <!-- HERO GAME CARD -->
+      <div style="position: relative;">
+        <span class="reuse-badge">[REUSE] GameExpanded (hero mode)</span>
+        <div class="hero-game">
+          <!-- Live status banner -->
+          <div style="text-align: center; font-size: 12px; font-weight: bold; color: #555; margin-bottom: 10px;">
+            ● LIVE &nbsp;·&nbsp; Q3 &nbsp; 4:22 remaining
+          </div>
+          <!-- Team vs Score display -->
+          <div style="display: flex; align-items: center; gap: 0;">
+            <div class="team-block" style="flex: 1;">
+              <div style="position: relative; display: inline-block;">
+                <span class="new-badge" style="top: -4px;">[NEW] TeamLogo</span>
+                <div class="team-logo-lg">LOGO</div>
+              </div>
+              <div class="team-name-lg">BOS <span style="font-size: 10px; border: 1px dashed #aaa; padding: 1px 3px; color: #666;">[green]</span></div>
+              <div class="team-city">Boston Celtics</div>
+            </div>
+            <div style="text-align: center; padding: 0 16px;">
+              <div class="hero-score">82 – 87</div>
+              <div style="font-size: 11px; color: #999;">Q3 · 4:22</div>
+            </div>
+            <div class="team-block" style="flex: 1;">
+              <div style="position: relative; display: inline-block;">
+                <span class="new-badge" style="top: -4px;">[NEW] TeamLogo</span>
+                <div class="team-logo-lg">LOGO</div>
+              </div>
+              <div class="team-name-lg">LAL <span style="font-size: 10px; border: 1px dashed #aaa; padding: 1px 3px; color: #666;">[purple]</span></div>
+              <div class="team-city">Los Angeles Lakers</div>
+            </div>
+          </div>
+
+          <!-- Quick team stats -->
+          <div style="display: grid; grid-template-columns: 1fr auto 1fr; gap: 10px; margin-top: 12px; padding-top: 10px; border-top: 1px dashed #ddd;">
+            <div style="display: flex; gap: 6px; justify-content: flex-start; flex-wrap: wrap;">
+              <div class="stat-card"><div class="val">47.3%</div><div class="lbl">FG%</div></div>
+              <div class="stat-card"><div class="val">14</div><div class="lbl">AST</div></div>
+            </div>
+            <div style="display: flex; align-items: center; font-size: 20px; color: #ccc;">↔</div>
+            <div style="display: flex; gap: 6px; justify-content: flex-end; flex-wrap: wrap;">
+              <div class="stat-card"><div class="val">51.2%</div><div class="lbl">FG%</div></div>
+              <div class="stat-card"><div class="val">19</div><div class="lbl">AST</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Team Tabs -->
+      <div style="display: flex; gap: 0; border-bottom: 2px solid #ccc; margin-bottom: 10px;">
+        <div style="padding: 6px 16px; border: 2px solid #333; border-bottom: none; border-radius: 6px 6px 0 0; font-size: 13px; font-weight: bold; background: #fff;">
+          LAL <span style="font-size: 9px; border: 1px dashed #aaa; padding: 1px 3px;">[purple accent]</span>
+        </div>
+        <div style="padding: 6px 16px; border: 1px solid #ccc; border-bottom: none; border-radius: 6px 6px 0 0; font-size: 13px; color: #888; background: #f9f9f9;">
+          BOS <span style="font-size: 9px; border: 1px dashed #aaa; padding: 1px 3px;">[green accent]</span>
+        </div>
+      </div>
+
+      <!-- Player cards grid -->
+      <div style="position: relative;">
+        <span class="new-badge" style="right: 0px;">[NEW] PlayerHighlightCard</span>
+        <div class="player-card-grid">
+          <div class="player-item">
+            <!-- Player Animation Area -->
+            <div style="width: 100%; height: 80px; border: 2px dashed #bbb; border-radius: 6px; background: #f7f7f7; display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 8px;">
+              <div style="font-size: 26px;">🏃</div>
+              <div style="font-size: 10px; color: #999; text-align: center;">[Player Animation<br/>Silhouette CSS]</div>
+            </div>
+            <div style="font-size: 12px; font-weight: bold;">LeBron James</div>
+            <div style="font-size: 10px; color: #777; margin-bottom: 6px;">SF · LAL</div>
+            <div style="display: flex; gap: 8px;">
+              <div style="text-align: center;"><div style="font-size: 16px; font-weight: bold;">24</div><div style="font-size: 9px; color: #888;">PTS</div></div>
+              <div style="text-align: center;"><div style="font-size: 16px; font-weight: bold;">8</div><div style="font-size: 9px; color: #888;">REB</div></div>
+              <div style="text-align: center;"><div style="font-size: 16px; font-weight: bold;">7</div><div style="font-size: 9px; color: #888;">AST</div></div>
+              <div style="text-align: center;"><div style="font-size: 16px; font-weight: bold; color: #555;">+7</div><div style="font-size: 9px; color: #888;">+/-</div></div>
+            </div>
+            <!-- Sparkline placeholder -->
+            <div style="margin-top: 6px;">
+              <div style="font-size: 9px; color: #aaa; text-transform: uppercase; margin-bottom: 3px;">Last 5</div>
+              <div style="height: 28px; border: 1px dashed #ccc; border-radius: 4px; background: #f9f9f9; display: flex; align-items: center; justify-content: center; font-size: 9px; color: #bbb;">[ Sparkline chart ]</div>
+            </div>
+          </div>
+          <div class="player-item">
+            <div style="width: 100%; height: 80px; border: 2px dashed #bbb; border-radius: 6px; background: #f7f7f7; display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 8px;">
+              <div style="font-size: 26px;">🤸</div>
+              <div style="font-size: 10px; color: #999; text-align: center;">[Player Animation<br/>Silhouette CSS]</div>
+            </div>
+            <div style="font-size: 12px; font-weight: bold;">Anthony Davis</div>
+            <div style="font-size: 10px; color: #777; margin-bottom: 6px;">C · LAL</div>
+            <div style="display: flex; gap: 8px;">
+              <div style="text-align: center;"><div style="font-size: 16px; font-weight: bold;">22</div><div style="font-size: 9px; color: #888;">PTS</div></div>
+              <div style="text-align: center;"><div style="font-size: 16px; font-weight: bold;">11</div><div style="font-size: 9px; color: #888;">REB</div></div>
+              <div style="text-align: center;"><div style="font-size: 16px; font-weight: bold;">2</div><div style="font-size: 9px; color: #888;">AST</div></div>
+              <div style="text-align: center;"><div style="font-size: 16px; font-weight: bold; color: #555;">+9</div><div style="font-size: 9px; color: #888;">+/-</div></div>
+            </div>
+            <div style="margin-top: 6px;">
+              <div style="height: 28px; border: 1px dashed #ccc; border-radius: 4px; background: #f9f9f9; display: flex; align-items: center; justify-content: center; font-size: 9px; color: #bbb;">[ Sparkline chart ]</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- View full box score link -->
+      <div style="margin-top: 10px; padding: 8px; border: 1px dashed #ccc; border-radius: 6px; font-size: 12px; text-align: center; color: #777;">
+        [ Full Box Score Table — <span style="text-decoration: underline; cursor: pointer;">click to expand all players</span> ]
+      </div>
+    </div>
+  </div>
+
+  <div class="divider" />
+
+  <!-- ======================== PREDICTIONS PAGE ======================== -->
+  <div class="section-label">Page: /predictions — AI Predictions (same sidebar layout)</div>
+  <div class="annotation">🆕 KEY CHANGE: vs. bracket shows both team logos side-by-side with city/name. Confidence fills toward winning team side.</div>
+
+  <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px;">
+    <div style="position: relative;">
+      <span class="reuse-badge">[REUSE] PredictionCard (enhanced)</span>
+      <div style="border: 2px solid #888; border-radius: 8px; padding: 14px; background: #fff;">
+        <!-- VS Bracket -->
+        <div class="pred-vs">
+          <div class="pred-team">
+            <div class="box" style="width: 40px; height: 40px; border-radius: 50%; margin: 0 auto 4px;">L</div>
+            <div style="font-size: 11px; font-weight: bold;">BOS</div>
+            <div style="font-size: 9px; color: #999;">Boston Celtics</div>
+          </div>
+          <div class="pred-vs-divider">vs</div>
+          <div class="pred-team" style="border: 2px solid #555;">
+            <div class="box" style="width: 40px; height: 40px; border-radius: 50%; margin: 0 auto 4px;">L</div>
+            <div style="font-size: 11px; font-weight: bold;">LAL <span style="font-size: 9px; border: 1px dashed #aaa; padding: 1px 3px;">[purple]</span></div>
+            <div style="font-size: 9px; color: #999;">Los Angeles Lakers</div>
+            <div style="font-size: 9px; background: #e0e0e0; border-radius: 10px; padding: 1px 6px; margin-top: 4px;">✓ Predicted Winner</div>
+          </div>
+        </div>
+        <!-- Confidence bar (horizontal) -->
+        <div style="margin: 8px 0;">
+          <div style="display: flex; justify-content: space-between; font-size: 10px; color: #888; margin-bottom: 3px;">
+            <span>BOS 32%</span>
+            <span style="font-weight: bold; font-size: 12px;">68% LAL</span>
+          </div>
+          <div style="height: 8px; border: 1px solid #aaa; border-radius: 4px; background: #e0e0e0; overflow: hidden;">
+            <div style="height: 100%; width: 68%; background: #888; border-radius: 4px; margin-left: 32%;"></div>
+          </div>
+        </div>
+        <!-- Score prediction -->
+        <div style="font-size: 18px; font-weight: bold; font-family: 'Courier New'; text-align: center; padding: 6px 0; border-bottom: 1px dashed #ddd; margin-bottom: 8px;">109 – 118</div>
+        <!-- Key factors -->
+        <ul style="font-size: 11px; color: #555; list-style: none; padding: 0;">
+          <li style="padding: 3px 0; border-bottom: 1px solid #f0f0f0; display: flex; gap: 5px;"><span>▹</span> Lakers 7-3 in last 10 home games vs Boston</li>
+          <li style="padding: 3px 0; border-bottom: 1px solid #f0f0f0; display: flex; gap: 5px;"><span>▹</span> LeBron 31 PPG last 5 games</li>
+          <li style="padding: 3px 0; display: flex; gap: 5px;"><span>▹</span> Celtics on back-to-back</li>
+        </ul>
+      </div>
+    </div>
+    <!-- Placeholder cards -->
+    <div style="border: 2px solid #ccc; border-radius: 8px; padding: 14px; background: #fafafa; opacity: 0.6;">
+      <div class="pred-vs">
+        <div class="pred-team" style="flex: 1; text-align: center;"><div class="box" style="width: 32px; height: 32px; border-radius: 50%; margin: 0 auto;">L</div><div style="font-size: 11px; font-weight: bold; margin-top: 4px;">DEN</div></div>
+        <div class="pred-vs-divider" style="border: 2px solid #555;">vs</div>
+        <div class="pred-team" style="flex: 1; text-align: center;"><div class="box" style="width: 32px; height: 32px; border-radius: 50%; margin: 0 auto;">L</div><div style="font-size: 11px; font-weight: bold; margin-top: 4px;">GSW</div></div>
+      </div>
+      <div style="font-size: 12px; text-align: center; margin: 8px 0;">DEN 72% winner</div>
+    </div>
+    <div style="border: 2px solid #ccc; border-radius: 8px; padding: 14px; background: #fafafa; opacity: 0.6;">
+      <div class="pred-vs">
+        <div class="pred-team" style="flex: 1; text-align: center;"><div class="box" style="width: 32px; height: 32px; border-radius: 50%; margin: 0 auto;">L</div><div style="font-size: 11px; font-weight: bold; margin-top: 4px;">MIL</div></div>
+        <div class="pred-vs-divider">vs</div>
+        <div class="pred-team" style="flex: 1; text-align: center; border: 2px solid #888;"><div class="box" style="width: 32px; height: 32px; border-radius: 50%; margin: 0 auto;">L</div><div style="font-size: 11px; font-weight: bold; margin-top: 4px;">MIA</div></div>
+      </div>
+      <div style="font-size: 12px; text-align: center; margin: 8px 0;">MIA 61% ✓ Correct</div>
+    </div>
+  </div>
+
+  <div class="divider" />
+
+  <!-- ======================== TAKES PAGE ======================== -->
+  <div class="section-label">Page: /takes — Media Takes (2-column masonry)</div>
+  <div class="annotation">🆕 KEY CHANGE: Two-column masonry grid. Avatar shows personality avatar image. Outlet displayed as colored pill. Inline "Hot take" flame rating visual.</div>
+
+  <div style="position: relative;">
+    <span class="new-badge" style="top: 0; right: 0;">[NEW] TakesMasonryGrid</span>
+    <div class="takes-grid">
+      <div class="take-card">
+        <div style="display: flex; gap: 8px; align-items: center; margin-bottom: 8px;">
+          <div style="position: relative; display: inline-block;">
+            <span class="new-badge" style="top: -5px; right: -5px; font-size: 9px;">[NEW] Avatar img</span>
+            <div style="width: 36px; height: 36px; border: 2px solid #888; border-radius: 50%; background: #ddd; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: bold;">SAS</div>
+          </div>
+          <div>
+            <div style="font-size: 12px; font-weight: bold;">Stephen A. Smith</div>
+            <div style="display: flex; gap: 5px; flex-wrap: wrap; margin-top: 2px;">
+              <span style="border: 1px solid #ccc; border-radius: 12px; padding: 1px 8px; font-size: 10px; background: #f0f0f0;">ESPN First Take</span>
+              <span style="border: 1px solid #ccc; border-radius: 12px; padding: 1px 8px; font-size: 10px;">🔥🔥🔥 HOT</span>
+            </div>
+          </div>
+          <span style="margin-left: auto; font-size: 10px; color: #aaa;">Feb 21</span>
+        </div>
+        <p style="font-style: italic; font-size: 12px; border-left: 3px solid #ccc; padding-left: 8px; margin-bottom: 8px;">"LeBron James is NO LONGER the best player on his own team. Anthony Davis has taken over. Full stop."</p>
+        <div style="display: flex; gap: 6px; margin-bottom: 6px;">
+          <div style="border: 1px solid #ccc; border-radius: 6px; padding: 4px 10px; font-size: 11px;">👍 1,243</div>
+          <div style="border: 1px solid #ccc; border-radius: 6px; padding: 4px 10px; font-size: 11px;">👎 2,891</div>
+          <div style="margin-left: auto; border: 1px dashed #aaa; border-radius: 6px; padding: 4px 10px; font-size: 11px;">🤖 AI Verdict</div>
+        </div>
+        <div style="height: 4px; background: #e0e0e0; border-radius: 2px;"><div style="height: 100%; width: 30%; background: #aaa; border-radius: 2px;"></div></div>
+        <div style="display: flex; justify-content: space-between; font-size: 10px; color: #999; margin-top: 3px;"><span>30% agree</span><span>70% disagree</span></div>
+      </div>
+
+      <div class="take-card">
+        <div style="display: flex; gap: 8px; align-items: center; margin-bottom: 8px;">
+          <div style="width: 36px; height: 36px; border: 2px solid #888; border-radius: 50%; background: #ddd; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: bold;">ZL</div>
+          <div>
+            <div style="font-size: 12px; font-weight: bold;">Zach Lowe</div>
+            <div style="display: flex; gap: 5px; margin-top: 2px;">
+              <span style="border: 1px solid #ccc; border-radius: 12px; padding: 1px 8px; font-size: 10px; background: #f0f0f0;">ESPN</span>
+              <span style="border: 1px solid #ccc; border-radius: 12px; padding: 1px 8px; font-size: 10px;">📊 Stat-Backed</span>
+            </div>
+          </div>
+        </div>
+        <p style="font-style: italic; font-size: 12px; border-left: 3px solid #ccc; padding-left: 8px; margin-bottom: 8px;">"The Celtics are the most complete team in the East and it's not particularly close. Their defense is historically elite."</p>
+        <div style="display: flex; gap: 6px; margin-bottom: 6px;">
+          <div style="border: 1px solid #ccc; border-radius: 6px; padding: 4px 10px; font-size: 11px;">👍 4,102</div>
+          <div style="border: 1px solid #ccc; border-radius: 6px; padding: 4px 10px; font-size: 11px;">👎 891</div>
+          <div style="margin-left: auto; border: 1px dashed #aaa; border-radius: 6px; padding: 4px 10px; font-size: 11px;">🤖 AI Verdict</div>
+        </div>
+        <div style="height: 4px; background: #e0e0e0; border-radius: 2px;"><div style="height: 100%; width: 82%; background: #aaa; border-radius: 2px;"></div></div>
+        <div style="display: flex; justify-content: space-between; font-size: 10px; color: #999; margin-top: 3px;"><span>82% agree</span><span>18% disagree</span></div>
+      </div>
+
+      <div class="take-card" style="opacity: 0.6;">
+        <div style="font-size: 11px; font-weight: bold; margin-bottom: 6px;">Shannon Sharpe · Club Shay Shay · 👥 Popular</div>
+        <p style="font-style: italic; font-size: 11px; border-left: 3px solid #ccc; padding-left: 8px;">"Nikola Jokic is the greatest offensive player at any position I have ever seen..."</p>
+      </div>
+
+      <div class="take-card" style="opacity: 0.6;">
+        <div style="font-size: 11px; font-weight: bold; margin-bottom: 6px;">Bill Simmons · The Ringer · 🔥 Hot</div>
+        <p style="font-style: italic; font-size: 11px; border-left: 3px solid #ccc; padding-left: 8px;">"The Warriors dynasty is officially over..."</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- LEGEND -->
+  <div style="margin-top: 24px; padding: 12px; border: 1px solid #ccc; border-radius: 6px; background: #f9f9f9; font-size: 11px; font-family: Arial, sans-serif;">
+    <strong>Key Differences from Option 1:</strong>
+    <ul style="margin-top: 6px; padding-left: 16px; list-style: disc; color: #555;">
+      <li>Live score ticker at very top of page</li>
+      <li>Left sidebar navigation for game switching (no more grid — single focused view)</li>
+      <li>Hero game display with large logos + head-to-head team stats</li>
+      <li>Player highlight cards with animation area inside main view (not just in modal)</li>
+      <li>Predictions show confidence as horizontal bar (not semicircle)</li>
+      <li>Takes page in 2-column masonry layout</li>
+    </ul>
+  </div>
+</div>
+</body>
+</html>
