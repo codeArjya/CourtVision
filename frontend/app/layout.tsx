@@ -5,7 +5,7 @@ import ScoreTicker from "@/components/layout/ScoreTicker";
 import Providers from "./providers";
 
 export const metadata: Metadata = {
-  title: "CourtIQ — Ball Knowledge AI",
+  title: "CourtVision — Ball Knowledge AI",
   description:
     "NBA live stats dashboard, AI predictions, and media takes feed powered by Gemini.",
 };

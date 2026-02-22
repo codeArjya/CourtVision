@@ -22,7 +22,7 @@ export default function AIVerdictBox({ verdict }: AIVerdictBoxProps) {
       {/* Header */}
       <div className="flex items-center gap-2 mb-3">
         <span className="text-orange text-sm font-semibold">
-          🤖 CourtIQ AI Verdict
+          🤖 CourtVision AI Verdict
         </span>
         <span
           className={`rounded-full px-3 py-0.5 text-xs border font-medium ${labelStyle}`}

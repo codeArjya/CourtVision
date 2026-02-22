@@ -18,7 +18,7 @@ export default function Navbar() {
       <span className="font-black text-xl mr-auto flex items-center gap-2">
         <span className="text-orange">🏀</span>
         <span className="text-primary">Court</span>
-        <span className="text-orange">IQ</span>
+        <span className="text-orange">Vision</span>
       </span>
 
       {/* Nav links */}

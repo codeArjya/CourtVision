@@ -23,7 +23,7 @@ export default function ChatPage() {
     <div className="max-w-4xl mx-auto px-4 py-8 flex flex-col h-[calc(100vh-84px)]">
       <div className="mb-6 flex-shrink-0">
         <h1 className="text-2xl font-bold text-primary flex items-center gap-2">
-          <span>CourtIQ Assistant</span>
+          <span>CourtVision Assistant</span>
           <span className="bg-orange/20 text-orange text-xs px-2 py-0.5 rounded-full border border-orange/40 font-mono">
             BETA
           </span>
@@ -54,7 +54,7 @@ export default function ChatPage() {
               }`}
             >
               <span className="text-[10px] text-dim font-bold uppercase tracking-widest mb-1.5 ml-1">
-                {m.role === "user" ? "You" : "CourtIQ AI"}
+                {m.role === "user" ? "You" : "CourtVision AI"}
               </span>
               <div
                 className={`px-4 py-2.5 rounded-2xl text-sm leading-relaxed whitespace-pre-wrap ${
@@ -72,7 +72,7 @@ export default function ChatPage() {
         {isLoading && messages[messages.length - 1]?.role === "user" && (
           <div className="flex flex-col max-w-[85%] mr-auto items-start animate-pulse">
             <span className="text-[10px] text-dim font-bold uppercase tracking-widest mb-1.5 ml-1">
-              CourtIQ AI
+              CourtVision AI
             </span>
             <div className="px-4 py-4 rounded-2xl bg-surfaceHigh border border-border rounded-bl-sm flex gap-1.5 items-center">
               <div className="w-1.5 h-1.5 bg-orange rounded-full animate-bounce delay-75"></div>
