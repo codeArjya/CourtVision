@@ -1,4 +1,4 @@
-# 🏀 CourtIQ — Ball Knowledge AI
+# 🏀 CourtVision — Ball Knowledge AI
 NBA live stats dashboard + AI predictions + media takes feed.
 **Stack:** Next.js 14 · FastAPI · Gemini 1.5 Flash · Supabase · Upstash Redis · XGBoost · balldontlie
 ---
